@@ -1,31 +1,35 @@
-package com.seonbistudy.seonbistudy.service;
+package com.seonbistudy.seonbistudy.service.impl;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.seonbistudy.seonbistudy.config.JwtService;
 import com.seonbistudy.seonbistudy.dto.auth.AuthResponse;
 import com.seonbistudy.seonbistudy.dto.auth.LoginRequest;
 import com.seonbistudy.seonbistudy.dto.auth.RegisterRequest;
-import com.seonbistudy.seonbistudy.exception.SeonbiException;
 import com.seonbistudy.seonbistudy.exception.ErrorCode;
+import com.seonbistudy.seonbistudy.exception.SeonbiException;
 import com.seonbistudy.seonbistudy.model.entity.User;
 import com.seonbistudy.seonbistudy.model.enums.AuthProvider;
 import com.seonbistudy.seonbistudy.repository.UserRepository;
+import com.seonbistudy.seonbistudy.service.IAuthService;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+public class AuthServiceImpl implements IAuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+    @Override
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
         // Validate username
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -70,6 +74,8 @@ public class AuthService {
                 .build();
     }
 
+    @Override
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         try {
             authenticationManager.authenticate(

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.seonbistudy.seonbistudy.dto.auth.AuthResponse;
 import com.seonbistudy.seonbistudy.dto.auth.LoginRequest;
 import com.seonbistudy.seonbistudy.dto.auth.RegisterRequest;
-import com.seonbistudy.seonbistudy.service.AuthService;
+import com.seonbistudy.seonbistudy.service.IAuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Authentication", description = "Authentication APIs")
 public class AuthController {
 
-    private final AuthService authService;
+    private final IAuthService authService;
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user", description = "Register a new user with username, password, email, full name, and role (STUDENT, INSTRUCTOR, or ADMIN)")

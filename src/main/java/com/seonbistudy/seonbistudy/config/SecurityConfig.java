@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.seonbistudy.seonbistudy.security.oauth2.OAuth2LoginFailureHandler;
 import com.seonbistudy.seonbistudy.security.oauth2.OAuth2LoginSuccessHandler;
-import com.seonbistudy.seonbistudy.service.UserService;
+import com.seonbistudy.seonbistudy.service.IUserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
-    private final UserService userService;
+    private final IUserService userService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
@@ -66,8 +66,9 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(passwordEncoder());
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userService);
+        authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
 

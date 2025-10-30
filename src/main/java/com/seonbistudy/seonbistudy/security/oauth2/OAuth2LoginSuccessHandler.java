@@ -13,7 +13,7 @@ import com.seonbistudy.seonbistudy.config.JwtService;
 import com.seonbistudy.seonbistudy.model.entity.User;
 import com.seonbistudy.seonbistudy.model.enums.AuthProvider;
 import com.seonbistudy.seonbistudy.model.enums.Role;
-import com.seonbistudy.seonbistudy.repository.UserRepository;
+import com.seonbistudy.seonbistudy.service.IUserService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,8 +24,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    private final IUserService userService;
     private final JwtService jwtService;
-    private final UserRepository userRepository;
 
     @Value("${app.oauth2.redirect-uri}")
     private String redirectUri;
@@ -40,20 +40,34 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String name = oAuth2User.getAttribute("name");
         String providerId = oAuth2User.getAttribute("sub");
 
-        User user = userRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    User newUser = User.builder()
-                            .email(email)
-                            .username(email.split("@")[0] + "_" + System.currentTimeMillis())
-                            .fullName(name)
-                            .provider(AuthProvider.GOOGLE)
-                            .providerId(providerId)
-                            .role(Role.STUDENT)
-                            .enabled(true)
-                            .build();
-                    return userRepository.save(newUser);
-                });
+        // Tìm kiếm user theo email
+        User user = userService.findByEmail(email);
 
+        if (user == null) {
+            // Nếu email chưa tồn tại, tạo account mới với role STUDENT
+            user = User.builder()
+                    .email(email)
+                    .username(email.split("@")[0] + "_" + System.currentTimeMillis())
+                    .fullName(name)
+                    .provider(AuthProvider.GOOGLE)
+                    .providerId(providerId)
+                    .role(Role.STUDENT)
+                    .enabled(true)
+                    .build();
+            user = userService.createUser(user);
+        } else {
+            // Nếu email đã tồn tại, kiểm tra xem account có enabled không
+            if (!userService.isAccountEnabled(user)) {
+                // Nếu account bị disabled, chuyển hướng với lỗi
+                String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
+                        .queryParam("error", "Account is disabled")
+                        .build().toUriString();
+                getRedirectStrategy().sendRedirect(request, response, targetUrl);
+                return;
+            }
+        }
+
+        // Tạo JWT token trực tiếp
         String token = jwtService.generateToken(user);
 
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
