@@ -4,28 +4,25 @@ import com.seonbistudy.seonbistudy.model.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
-@Table(name = "tbl_streak")
+@Table(name = "tbl_user_progress")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Streak extends BaseEntity {
+public class UserProgress extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false, unique = true)
     private Account account;
 
-    @Column(name = "current_streak", nullable = false)
-    private int currentStreak = 0;
+    @Column(name = "level", nullable = false)
+    private int level = 1;
 
-    @Column(name = "max_streak", nullable = false)
-    private int maxStreak = 0;
+    @Column(name = "total_xp", nullable = false)
+    private Long totalXp = 0L;
 
-    @Column(name = "last_activity_date")
-    private LocalDateTime lastActivityDate;
-
+    @Column(name = "xp_to_next_level", nullable = false)
+    private int xpToNextLevel;
 }
