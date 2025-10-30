@@ -34,7 +34,7 @@ public enum ErrorCode {
     // ============================================
     
     // Credential Errors (AUTH-1xxx)
-    AUTH_INVALID_CREDENTIALS("AUTH-1001", "Invalid username or password", HttpStatus.UNAUTHORIZED),
+    AUTH_INVALID_CREDENTIALS("AUTH-1001", "Invalid email or password", HttpStatus.UNAUTHORIZED),
     AUTH_USER_NOT_FOUND("AUTH-1002", "User not found", HttpStatus.NOT_FOUND),
     AUTH_ACCOUNT_DISABLED("AUTH-1003", "Account is disabled", HttpStatus.FORBIDDEN),
     AUTH_ACCOUNT_LOCKED("AUTH-1004", "Account is locked", HttpStatus.FORBIDDEN),

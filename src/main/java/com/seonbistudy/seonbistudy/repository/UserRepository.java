@@ -9,9 +9,7 @@ import com.seonbistudy.seonbistudy.model.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByUsername(String username);
-    Optional<User> findByEmail(String email);
-    Boolean existsByUsername(String username);
-    Boolean existsByEmail(String email);
-    Optional<User> findByProviderId(String providerId);
+    Optional<User> findByAccountId(Long accountId);
+    Optional<User> findByAccount_Email(String email);
+    Optional<User> findByAccount_Username(String username);
 }

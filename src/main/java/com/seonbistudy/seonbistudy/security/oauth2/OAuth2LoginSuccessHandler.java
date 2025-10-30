@@ -9,7 +9,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.seonbistudy.seonbistudy.config.JwtService;
+import com.seonbistudy.seonbistudy.security.jwt.JwtService;
+import com.seonbistudy.seonbistudy.model.entity.Account;
 import com.seonbistudy.seonbistudy.model.entity.User;
 import com.seonbistudy.seonbistudy.model.enums.AuthProvider;
 import com.seonbistudy.seonbistudy.model.enums.Role;
@@ -40,24 +41,30 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String name = oAuth2User.getAttribute("name");
         String providerId = oAuth2User.getAttribute("sub");
 
-        // Tìm kiếm user theo email
-        User user = userService.findByEmail(email);
+        // Tìm kiếm account theo email
+        Account account = userService.findAccountByEmail(email);
 
-        if (user == null) {
+        if (account == null) {
             // Nếu email chưa tồn tại, tạo account mới với role STUDENT
-            user = User.builder()
+            account = Account.builder()
                     .email(email)
                     .username(email.split("@")[0] + "_" + System.currentTimeMillis())
-                    .fullName(name)
                     .provider(AuthProvider.GOOGLE)
                     .providerId(providerId)
                     .role(Role.STUDENT)
                     .enabled(true)
                     .build();
-            user = userService.createUser(user);
+            
+            // Tạo user profile
+            User user = User.builder()
+                    .fullName(name)
+                    .build();
+            
+            // Save account and user
+            account = userService.createAccountWithUser(account, user);
         } else {
             // Nếu email đã tồn tại, kiểm tra xem account có enabled không
-            if (!userService.isAccountEnabled(user)) {
+            if (!userService.isAccountEnabled(account)) {
                 // Nếu account bị disabled, chuyển hướng với lỗi
                 String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
                         .queryParam("error", "Account is disabled")
@@ -65,10 +72,13 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 getRedirectStrategy().sendRedirect(request, response, targetUrl);
                 return;
             }
+            
+            // Update last login
+            userService.updateLastLogin(account);
         }
 
         // Tạo JWT token trực tiếp
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateToken(account);
 
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
                 .queryParam("token", token)

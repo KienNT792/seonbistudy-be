@@ -1,4 +1,4 @@
-package com.seonbistudy.seonbistudy.config;
+package com.seonbistudy.seonbistudy.security.jwt;
 
 import java.io.IOException;
 

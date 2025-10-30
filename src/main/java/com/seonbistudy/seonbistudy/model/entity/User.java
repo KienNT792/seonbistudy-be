@@ -1,20 +1,14 @@
 package com.seonbistudy.seonbistudy.model.entity;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import java.time.LocalDate;
 
 import com.seonbistudy.seonbistudy.model.base.BaseEntity;
-import com.seonbistudy.seonbistudy.model.enums.AuthProvider;
-import com.seonbistudy.seonbistudy.model.enums.Role;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,69 +23,27 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User extends BaseEntity implements UserDetails {
+public class User extends BaseEntity {
 
-    @Column(name = "username", nullable = false, unique = true)
-    private String username;
-
-    @Column(name = "hashed_password")
-    private String hashedPassword;
-
-    @Column(name = "email", nullable = false, unique = true)
-    private String email;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", nullable = false, unique = true)
+    private Account account;
 
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @Column(name = "enabled", nullable = false)
-    @Builder.Default
-    private boolean enabled = true;
+    @Column(name = "phone_number", length = 20)
+    private String phoneNumber;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "provider", nullable = false)
-    @Builder.Default
-    private AuthProvider provider = AuthProvider.LOCAL;
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    @Builder.Default
-    private Role role = Role.STUDENT;
+    @Column(name = "address", length = 500)
+    private String address;
 
-    @Column(name = "provider_id")
-    private String providerId;
+    @Column(name = "avatar_url", length = 500)
+    private String avatarUrl;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
-    }
-
-    @Override
-    public String getPassword() {
-        return hashedPassword;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
+    @Column(name = "bio", length = 1000)
+    private String bio;
 }

@@ -6,16 +6,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.seonbistudy.seonbistudy.config.JwtService;
+import com.seonbistudy.seonbistudy.security.jwt.JwtService;
 import com.seonbistudy.seonbistudy.dto.auth.AuthResponse;
 import com.seonbistudy.seonbistudy.dto.auth.LoginRequest;
 import com.seonbistudy.seonbistudy.dto.auth.RegisterRequest;
 import com.seonbistudy.seonbistudy.exception.ErrorCode;
 import com.seonbistudy.seonbistudy.exception.SeonbiException;
+import com.seonbistudy.seonbistudy.model.entity.Account;
 import com.seonbistudy.seonbistudy.model.entity.User;
 import com.seonbistudy.seonbistudy.model.enums.AuthProvider;
-import com.seonbistudy.seonbistudy.repository.UserRepository;
+import com.seonbistudy.seonbistudy.repository.AccountRepository;
 import com.seonbistudy.seonbistudy.service.IAuthService;
+import com.seonbistudy.seonbistudy.service.IUserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +25,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements IAuthService {
 
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
+    private final IUserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -32,12 +35,12 @@ public class AuthServiceImpl implements IAuthService {
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         // Validate username
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (accountRepository.existsByUsername(request.getUsername())) {
             throw new SeonbiException(ErrorCode.AUTH_USERNAME_EXISTS);
         }
 
         // Validate email
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (accountRepository.existsByEmail(request.getEmail())) {
             throw new SeonbiException(ErrorCode.AUTH_EMAIL_EXISTS);
         }
 
@@ -51,58 +54,70 @@ public class AuthServiceImpl implements IAuthService {
             throw new SeonbiException(ErrorCode.AUTH_PASSWORD_TOO_WEAK);
         }
 
-        var user = User.builder()
+        // Create account
+        var account = Account.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
-                .fullName(request.getFullName())
                 .hashedPassword(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
                 .provider(AuthProvider.LOCAL)
                 .enabled(true)
                 .build();
 
-        userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
+        // Create user profile
+        var user = User.builder()
+                .fullName(request.getFullName())
+                .build();
+
+        // Save account and user
+        Account savedAccount = userService.createAccountWithUser(account, user);
+        
+        var jwtToken = jwtService.generateToken(savedAccount);
 
         return AuthResponse.builder()
                 .token(jwtToken)
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
+                .id(savedAccount.getId())
+                .username(savedAccount.getUsername())
+                .email(savedAccount.getEmail())
                 .fullName(user.getFullName())
-                .role(user.getRole())
+                .role(savedAccount.getRole())
                 .build();
     }
 
     @Override
     @Transactional
     public AuthResponse login(LoginRequest request) {
+        // Find account by email first
+        var account = accountRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new SeonbiException(ErrorCode.AUTH_INVALID_CREDENTIALS));
+
+        // Authenticate using email as username
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
+                            account.getUsername(), // Use username for authentication
                             request.getPassword()));
         } catch (Exception e) {
             throw new SeonbiException(ErrorCode.AUTH_INVALID_CREDENTIALS);
         }
 
-        var user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new SeonbiException(ErrorCode.AUTH_USER_NOT_FOUND));
-
         // Check if account is enabled
-        if (!user.isEnabled()) {
+        if (!account.isEnabled()) {
             throw new SeonbiException(ErrorCode.AUTH_ACCOUNT_DISABLED);
         }
 
-        var jwtToken = jwtService.generateToken(user);
+        // Update last login
+        userService.updateLastLogin(account);
+
+        var jwtToken = jwtService.generateToken(account);
 
         return AuthResponse.builder()
                 .token(jwtToken)
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .role(user.getRole())
+                .id(account.getId())
+                .username(account.getUsername())
+                .email(account.getEmail())
+                .fullName(account.getUser() != null ? account.getUser().getFullName() : null)
+                .role(account.getRole())
                 .build();
     }
 }

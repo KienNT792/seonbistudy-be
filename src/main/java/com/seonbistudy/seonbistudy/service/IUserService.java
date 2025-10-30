@@ -4,6 +4,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import com.seonbistudy.seonbistudy.model.entity.Account;
 import com.seonbistudy.seonbistudy.model.entity.User;
 
 public interface IUserService extends UserDetailsService {
@@ -12,9 +13,11 @@ public interface IUserService extends UserDetailsService {
     
     UserDetails loadUserByEmail(String email) throws UsernameNotFoundException;
     
-    User findByEmail(String email);
+    Account findAccountByEmail(String email);
     
-    User createUser(User user);
+    Account createAccountWithUser(Account account, User user);
     
-    boolean isAccountEnabled(User user);
+    boolean isAccountEnabled(Account account);
+    
+    void updateLastLogin(Account account);
 }

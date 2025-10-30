@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
         log.error("SeonbiException: {} - {}", ex.getErrorCode().getCode(), ex.getMessage(), ex);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ex.getErrorCode().getCode())
+                .code(ex.getErrorCode().getCode())
                 .message(ex.getMessage())
                 .status(ex.getErrorCode().getHttpStatus().value())
                 .path(getRequestPath(request))
@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
         log.error("BadCredentialsException: {}", ex.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ErrorCode.AUTH_INVALID_CREDENTIALS.getCode())
+                .code(ErrorCode.AUTH_INVALID_CREDENTIALS.getCode())
                 .message(ErrorCode.AUTH_INVALID_CREDENTIALS.getMessage())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .path(getRequestPath(request))
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
         log.error("DisabledException: {}", ex.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ErrorCode.AUTH_ACCOUNT_DISABLED.getCode())
+                .code(ErrorCode.AUTH_ACCOUNT_DISABLED.getCode())
                 .message(ErrorCode.AUTH_ACCOUNT_DISABLED.getMessage())
                 .status(HttpStatus.FORBIDDEN.value())
                 .path(getRequestPath(request))
@@ -85,7 +85,7 @@ public class GlobalExceptionHandler {
         log.error("LockedException: {}", ex.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ErrorCode.AUTH_ACCOUNT_LOCKED.getCode())
+                .code(ErrorCode.AUTH_ACCOUNT_LOCKED.getCode())
                 .message(ErrorCode.AUTH_ACCOUNT_LOCKED.getMessage())
                 .status(HttpStatus.FORBIDDEN.value())
                 .path(getRequestPath(request))
@@ -102,7 +102,7 @@ public class GlobalExceptionHandler {
         log.error("UsernameNotFoundException: {}", ex.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ErrorCode.AUTH_USER_NOT_FOUND.getCode())
+                .code(ErrorCode.AUTH_USER_NOT_FOUND.getCode())
                 .message(ErrorCode.AUTH_USER_NOT_FOUND.getMessage())
                 .status(HttpStatus.NOT_FOUND.value())
                 .path(getRequestPath(request))
@@ -119,7 +119,7 @@ public class GlobalExceptionHandler {
         log.error("ExpiredJwtException: {}", ex.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ErrorCode.AUTH_TOKEN_EXPIRED.getCode())
+                .code(ErrorCode.AUTH_TOKEN_EXPIRED.getCode())
                 .message(ErrorCode.AUTH_TOKEN_EXPIRED.getMessage())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .path(getRequestPath(request))
@@ -136,7 +136,7 @@ public class GlobalExceptionHandler {
         log.error("JwtException: {}", ex.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ErrorCode.AUTH_TOKEN_INVALID.getCode())
+                .code(ErrorCode.AUTH_TOKEN_INVALID.getCode())
                 .message(ErrorCode.AUTH_TOKEN_INVALID.getMessage())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .path(getRequestPath(request))
@@ -153,7 +153,7 @@ public class GlobalExceptionHandler {
         log.error("AccessDeniedException: {}", ex.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ErrorCode.AUTH_ACCESS_DENIED.getCode())
+                .code(ErrorCode.AUTH_ACCESS_DENIED.getCode())
                 .message(ErrorCode.AUTH_ACCESS_DENIED.getMessage())
                 .status(HttpStatus.FORBIDDEN.value())
                 .path(getRequestPath(request))
@@ -170,7 +170,7 @@ public class GlobalExceptionHandler {
         log.error("AuthenticationException: {}", ex.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ErrorCode.AUTH_INVALID_CREDENTIALS.getCode())
+                .code(ErrorCode.AUTH_INVALID_CREDENTIALS.getCode())
                 .message(ex.getMessage())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .path(getRequestPath(request))
@@ -188,7 +188,7 @@ public class GlobalExceptionHandler {
         log.error("ValidationException: {}", ex.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ErrorCode.CMN_VALIDATION_FAILED.getCode())
+                .code(ErrorCode.CMN_VALIDATION_FAILED.getCode())
                 .message("Validation failed")
                 .status(HttpStatus.BAD_REQUEST.value())
                 .path(getRequestPath(request))
@@ -211,7 +211,7 @@ public class GlobalExceptionHandler {
         log.error("IllegalArgumentException: {}", ex.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ErrorCode.CMN_INVALID_INPUT_FORMAT.getCode())
+                .code(ErrorCode.CMN_INVALID_INPUT_FORMAT.getCode())
                 .message(ex.getMessage())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .path(getRequestPath(request))
@@ -228,7 +228,7 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error occurred: ", ex);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ErrorCode.CMN_INTERNAL_ERROR.getCode())
+                .code(ErrorCode.CMN_INTERNAL_ERROR.getCode())
                 .message("An unexpected error occurred. Please try again later.")
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .path(getRequestPath(request))
