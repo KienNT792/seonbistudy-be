@@ -72,9 +72,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 getRedirectStrategy().sendRedirect(request, response, targetUrl);
                 return;
             }
-            
-            // Update last login
-            userService.updateLastLogin(account);
+            // TODO: Update streak.
         }
 
         // Tạo JWT token trực tiếp

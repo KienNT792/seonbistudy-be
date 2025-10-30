@@ -10,14 +10,8 @@ import com.seonbistudy.seonbistudy.model.entity.User;
 public interface IUserService extends UserDetailsService {
     
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
-    
     UserDetails loadUserByEmail(String email) throws UsernameNotFoundException;
-    
     Account findAccountByEmail(String email);
-    
     Account createAccountWithUser(Account account, User user);
-    
     boolean isAccountEnabled(Account account);
-    
-    void updateLastLogin(Account account);
 }

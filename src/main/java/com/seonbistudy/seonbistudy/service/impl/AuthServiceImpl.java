@@ -1,5 +1,8 @@
 package com.seonbistudy.seonbistudy.service.impl;
 
+import com.seonbistudy.seonbistudy.model.entity.Streak;
+import com.seonbistudy.seonbistudy.repository.StreakRepository;
+import com.seonbistudy.seonbistudy.service.IStreakService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,15 +24,19 @@ import com.seonbistudy.seonbistudy.service.IUserService;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements IAuthService {
 
     private final AccountRepository accountRepository;
     private final IUserService userService;
+    private final IStreakService streakService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final StreakRepository streakRepository;
 
     @Override
     @Transactional
@@ -71,8 +78,15 @@ public class AuthServiceImpl implements IAuthService {
 
         // Save account and user
         Account savedAccount = userService.createAccountWithUser(account, user);
-        
+
         var jwtToken = jwtService.generateToken(savedAccount);
+        Streak newStreak = Streak.builder()
+                .account(savedAccount)
+                .currentStreak(0)
+                .maxStreak(0)
+                .lastActivityDate(LocalDateTime.now())
+                .build();
+        streakRepository.save(newStreak);
 
         return AuthResponse.builder()
                 .token(jwtToken)
@@ -87,28 +101,23 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        // Find account by email first
         var account = accountRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new SeonbiException(ErrorCode.AUTH_INVALID_CREDENTIALS));
 
-        // Authenticate using email as username
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            account.getUsername(), // Use username for authentication
+                            account.getUsername(),
                             request.getPassword()));
         } catch (Exception e) {
             throw new SeonbiException(ErrorCode.AUTH_INVALID_CREDENTIALS);
         }
 
-        // Check if account is enabled
         if (!account.isEnabled()) {
             throw new SeonbiException(ErrorCode.AUTH_ACCOUNT_DISABLED);
         }
 
-        // Update last login
-        userService.updateLastLogin(account);
-
+        streakService.updateStreak(account.getId());
         var jwtToken = jwtService.generateToken(account);
 
         return AuthResponse.builder()

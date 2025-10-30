@@ -1,6 +1,5 @@
 package com.seonbistudy.seonbistudy.model.entity;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -17,7 +16,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -61,16 +59,16 @@ public class Account extends BaseEntity implements UserDetails {
     @Column(name = "provider_id")
     private String providerId;
 
-    @Column(name = "last_login")
-    private LocalDateTime lastLogin;
-
-    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private User user;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
+
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
+    private Streak streak;
 
     @Override
     public String getPassword() {

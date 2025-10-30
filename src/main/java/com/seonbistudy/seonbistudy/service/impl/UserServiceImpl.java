@@ -43,27 +43,14 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public Account createAccountWithUser(Account account, User user) {
-        // Save account first
         Account savedAccount = accountRepository.save(account);
-        
-        // Set account reference in user
         user.setAccount(savedAccount);
-        
-        // Save user
         userRepository.save(user);
-        
         return savedAccount;
     }
 
     @Override
     public boolean isAccountEnabled(Account account) {
         return account != null && account.isEnabled();
-    }
-
-    @Override
-    @Transactional
-    public void updateLastLogin(Account account) {
-        account.setLastLogin(LocalDateTime.now());
-        accountRepository.save(account);
     }
 }

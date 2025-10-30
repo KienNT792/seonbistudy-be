@@ -5,8 +5,6 @@ import com.seonbistudy.seonbistudy.dto.auth.LoginRequest;
 import com.seonbistudy.seonbistudy.dto.auth.RegisterRequest;
 
 public interface IAuthService {
-    
     AuthResponse register(RegisterRequest request);
-    
     AuthResponse login(LoginRequest request);
 }

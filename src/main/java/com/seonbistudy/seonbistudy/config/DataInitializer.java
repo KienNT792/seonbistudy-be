@@ -46,8 +46,6 @@ public class DataInitializer implements CommandLineRunner {
                     .fullName("System Administrator")
                     .build();
             userRepository.save(adminUser);
-            
-            log.info("✅ Created ADMIN account - Username: admin, Password: admin123");
         }
 
         // Initialize INSTRUCTOR account
@@ -68,7 +66,6 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             userRepository.save(instructorUser);
             
-            log.info("✅ Created INSTRUCTOR account - Username: instructor, Password: instructor123");
         }
 
         // Initialize STUDENT account
@@ -88,10 +85,6 @@ public class DataInitializer implements CommandLineRunner {
                     .fullName("Demo Student")
                     .build();
             userRepository.save(studentUser);
-            
-            log.info("✅ Created STUDENT account - Username: student, Password: student123");
         }
-
-        log.info("🎉 Data initialization completed!");
     }
 }
