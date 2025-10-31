@@ -22,7 +22,4 @@ public class UserProgress extends BaseEntity {
 
     @Column(name = "total_xp", nullable = false)
     private Long totalXp = 0L;
-
-    @Column(name = "xp_to_next_level", nullable = false)
-    private int xpToNextLevel;
 }

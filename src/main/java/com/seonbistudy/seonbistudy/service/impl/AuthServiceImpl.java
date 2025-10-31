@@ -3,6 +3,7 @@ package com.seonbistudy.seonbistudy.service.impl;
 import com.seonbistudy.seonbistudy.model.entity.Streak;
 import com.seonbistudy.seonbistudy.repository.StreakRepository;
 import com.seonbistudy.seonbistudy.service.IStreakService;
+import com.seonbistudy.seonbistudy.service.IXpService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,7 @@ public class AuthServiceImpl implements IAuthService {
     private final AccountRepository accountRepository;
     private final IUserService userService;
     private final IStreakService streakService;
+    private final IXpService xpService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
