@@ -23,9 +23,8 @@ public class Streak extends BaseEntity {
     private int currentStreak = 0;
 
     @Column(name = "max_streak", nullable = false)
-    private int maxStreak = 0;
+    private int maxStreak = 1;
 
     @Column(name = "last_activity_date")
     private LocalDateTime lastActivityDate;
-
 }

@@ -82,13 +82,7 @@ public class AuthServiceImpl implements IAuthService {
         Account savedAccount = userService.createAccountWithUser(account, user);
 
         var jwtToken = jwtService.generateToken(savedAccount);
-        Streak newStreak = Streak.builder()
-                .account(savedAccount)
-                .currentStreak(0)
-                .maxStreak(0)
-                .lastActivityDate(LocalDateTime.now())
-                .build();
-        streakRepository.save(newStreak);
+
 
         return AuthResponse.builder()
                 .token(jwtToken)

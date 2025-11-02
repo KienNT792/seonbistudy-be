@@ -18,8 +18,8 @@ public class UserProgress extends BaseEntity {
     private Account account;
 
     @Column(name = "level", nullable = false)
-    private int level = 1;
+    private int level;
 
     @Column(name = "total_xp", nullable = false)
-    private Long totalXp = 0L;
+    private Long totalXp;
 }
