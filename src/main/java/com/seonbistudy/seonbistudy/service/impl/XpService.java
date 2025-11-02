@@ -26,14 +26,16 @@ public class XpService implements IXpService {
     }
 
     @Override
+    @Async
+    @Transactional
     public void grantXp(Long accountId, int xpGained, String activityType) {
         grantXpInternal(accountId, xpGained, activityType);
     }
 
     @Override
     public void incrementPendingXp(Long accountId, XpActivityType activity) {
-        String redisKey = "xp:pending:" + activity.getActivityName() + ":" + accountId;
-        redisTemplate.opsForValue().increment(redisKey, activity.getDefaultXp());
+//        String redisKey = "xp:pending:" + activity.getActivityName() + ":" + accountId;
+//        redisTemplate.opsForValue().increment(redisKey, activity.getDefaultXp());
     }
 
     private void grantXpInternal(Long accountId, int xpGained, String activityType) {

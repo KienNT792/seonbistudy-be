@@ -2,6 +2,8 @@ package com.seonbistudy.seonbistudy.service.impl;
 
 import java.time.LocalDateTime;
 
+import com.seonbistudy.seonbistudy.model.entity.UserProgress;
+import com.seonbistudy.seonbistudy.repository.UserProgressRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ public class UserServiceImpl implements IUserService {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private final UserProgressRepository userProgressRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -46,6 +49,13 @@ public class UserServiceImpl implements IUserService {
         Account savedAccount = accountRepository.save(account);
         user.setAccount(savedAccount);
         userRepository.save(user);
+
+        // Create default UserProgress
+        var newUserProgress = UserProgress.builder()
+                .account(savedAccount)
+                .build();
+        userProgressRepository.save(newUserProgress);
+
         return savedAccount;
     }
 
