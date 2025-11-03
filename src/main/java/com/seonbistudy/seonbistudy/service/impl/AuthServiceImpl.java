@@ -5,6 +5,7 @@ import com.seonbistudy.seonbistudy.service.IStreakService;
 import com.seonbistudy.seonbistudy.service.IXpService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,6 +107,17 @@ public class AuthServiceImpl implements IAuthService {
                 .refreshToken(jwtService.generateRefreshToken(account))
                 .user(buildUser(account))
                 .build();
+    }
+
+    @Override
+    public AuthResponse.UserResponse getMe(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new SeonbiException(ErrorCode.AUTH_INVALID_CREDENTIALS);
+        }
+        String username = auth.getName();
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new SeonbiException(ErrorCode.AUTH_INVALID_CREDENTIALS));
+        return buildUser(account);
     }
 
     private AuthResponse.UserResponse buildUser(Account account) {
