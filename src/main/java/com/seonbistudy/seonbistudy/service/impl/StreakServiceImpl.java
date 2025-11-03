@@ -11,7 +11,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -19,6 +18,7 @@ import java.time.temporal.ChronoUnit;
 @RequiredArgsConstructor
 public class StreakServiceImpl implements IStreakService {
     private final StreakRepository streakRepository;
+    public record StreakUpdateResult(boolean firstLoginToday, int currentStreak, int maxStreak) {}
 
     @Override
     public void initStreak(Account account) {
@@ -33,13 +33,15 @@ public class StreakServiceImpl implements IStreakService {
 
     @Override
     @Transactional
-    public void updateStreak(Account account) {
+    public StreakUpdateResult updateStreak(Account account) {
         var streak = getStreak(account);
 
-        LocalDate today = TimeUtils.today();
-        LocalDate lastDay = streak.getLastActivityDate() != null
+        var today = TimeUtils.today();
+        var lastDay = streak.getLastActivityDate() != null
                 ? streak.getLastActivityDate().atZone(TimeUtils.TIME_ZONE).toLocalDate()
                 : null;
+
+        boolean firstLoginToday = (lastDay == null) || !lastDay.isEqual(today);
 
         if (lastDay == null) {
             streak.setCurrentStreak(1);
@@ -54,6 +56,8 @@ public class StreakServiceImpl implements IStreakService {
 
         streak.setLastActivityDate(TimeUtils.now());
         streakRepository.save(streak);
+
+        return new StreakUpdateResult(firstLoginToday, streak.getCurrentStreak(), streak.getMaxStreak());
     }
 
 

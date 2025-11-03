@@ -96,8 +96,10 @@ public class AuthServiceImpl implements IAuthService {
             throw new SeonbiException(ErrorCode.AUTH_ACCOUNT_DISABLED);
         }
 
-        streakService.updateStreak(account);
-        xpService.grantXp(account.getId(), XpActivityType.DAILY_LOGIN);
+        var result = streakService.updateStreak(account);
+        if (result.firstLoginToday()) {
+            xpService.grantXp(account.getId(), XpActivityType.DAILY_LOGIN);
+        }
 
         return AuthResponse.builder()
                 .accessToken(jwtService.generateAccessToken(account))
@@ -108,7 +110,7 @@ public class AuthServiceImpl implements IAuthService {
 
     private AuthResponse.UserResponse buildUser(Account account) {
         var progress = xpService.getProgress(account);
-        var streak =  streakService.getStreak(account);
+        var streak = streakService.getStreak(account);
 
         AuthResponse.UserResponse user = new AuthResponse.UserResponse();
         user.setId(account.getId());
