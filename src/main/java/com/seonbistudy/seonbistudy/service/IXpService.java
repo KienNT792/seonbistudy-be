@@ -17,5 +17,5 @@ public interface IXpService {
     void incrementPendingXp(Long accountId, XpActivityType activity);
 
     UserProgress getProgress(Account account);
-    UserProgress initProgress(Account account);
+    void initProgress(Account account);
 }

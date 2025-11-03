@@ -28,5 +28,6 @@ public class AuthResponse {
         private long currentXp;
         private int currentStreak;
         private String streakMsg;
+        private int currentLevel;
     }
 }

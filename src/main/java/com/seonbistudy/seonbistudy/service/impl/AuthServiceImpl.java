@@ -1,8 +1,7 @@
 package com.seonbistudy.seonbistudy.service.impl;
 
 import com.seonbistudy.seonbistudy.model.enums.XpActivityType;
-import com.seonbistudy.seonbistudy.service.IStreakService;
-import com.seonbistudy.seonbistudy.service.IXpService;
+import com.seonbistudy.seonbistudy.service.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,8 +19,6 @@ import com.seonbistudy.seonbistudy.model.entity.Account;
 import com.seonbistudy.seonbistudy.model.entity.User;
 import com.seonbistudy.seonbistudy.model.enums.AuthProvider;
 import com.seonbistudy.seonbistudy.repository.AccountRepository;
-import com.seonbistudy.seonbistudy.service.IAuthService;
-import com.seonbistudy.seonbistudy.service.IUserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,6 +29,7 @@ public class AuthServiceImpl implements IAuthService {
     private final AccountRepository accountRepository;
     private final IUserService userService;
     private final IStreakService streakService;
+    private final ILevelThresholdService levelThresholdService;
     private final IXpService xpService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -103,7 +101,9 @@ public class AuthServiceImpl implements IAuthService {
         }
 
         var user = buildUser(account);
+        var currentLevel = levelThresholdService.getLevelByXp(user.getCurrentXp());
         user.setStreakMsg(result.getMessage());
+        user.setCurrentLevel(currentLevel.getLevel());
 
         return AuthResponse.builder()
                 .accessToken(jwtService.generateAccessToken(account))

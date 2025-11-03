@@ -59,7 +59,7 @@ public class StreakServiceImpl implements IStreakService {
                 streak.setCurrentStreak(1);
                 message = messageSource.getMessage("streak.reset", null, LocaleContextHolder.getLocale());
             } else {
-                message = messageSource.getMessage("streak.maintain", null, LocaleContextHolder.getLocale());
+                message = messageSource.getMessage("streak.common", null, LocaleContextHolder.getLocale());
             }
         }
 

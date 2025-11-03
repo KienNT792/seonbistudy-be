@@ -46,14 +46,13 @@ public class XpService implements IXpService {
     }
 
     @Override
-    public UserProgress initProgress(Account account) {
+    public void initProgress(Account account) {
         var newProgress = UserProgress.builder()
                 .account(account)
                 .level(1)
                 .totalXp((long) XpActivityType.ACCOUNT_REGISTER.getDefaultXp())
                 .build();
-
-        return userProgressRepository.save(newProgress);
+        userProgressRepository.save(newProgress);
     }
 
     private void grantXpInternal(Long accountId, int xpGained, String activityType) {
