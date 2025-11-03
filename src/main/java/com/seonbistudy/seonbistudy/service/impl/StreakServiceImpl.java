@@ -1,5 +1,6 @@
 package com.seonbistudy.seonbistudy.service.impl;
 
+import com.seonbistudy.seonbistudy.dto.streak.StreakUpdateResult;
 import com.seonbistudy.seonbistudy.exception.ErrorCode;
 import com.seonbistudy.seonbistudy.exception.SeonbiException;
 import com.seonbistudy.seonbistudy.model.entity.Account;
@@ -9,6 +10,8 @@ import com.seonbistudy.seonbistudy.service.IStreakService;
 import com.seonbistudy.seonbistudy.utils.TimeUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,7 +21,7 @@ import java.time.temporal.ChronoUnit;
 @RequiredArgsConstructor
 public class StreakServiceImpl implements IStreakService {
     private final StreakRepository streakRepository;
-    public record StreakUpdateResult(boolean firstLoginToday, int currentStreak, int maxStreak) {}
+    private final MessageSource messageSource;
 
     @Override
     public void initStreak(Account account) {
@@ -41,25 +44,37 @@ public class StreakServiceImpl implements IStreakService {
                 ? streak.getLastActivityDate().atZone(TimeUtils.TIME_ZONE).toLocalDate()
                 : null;
 
-        boolean firstLoginToday = (lastDay == null) || !lastDay.isEqual(today);
+        boolean firstLoginToday = false;
+        String message;
 
         if (lastDay == null) {
             streak.setCurrentStreak(1);
+            message = messageSource.getMessage("streak.new", null, LocaleContextHolder.getLocale());
+            firstLoginToday = true;
         } else {
             long days = ChronoUnit.DAYS.between(lastDay, today);
             if (days == 1) {
                 streak.setCurrentStreak(streak.getCurrentStreak() + 1);
+                message = messageSource.getMessage("streak.increment",
+                        new Object[]{streak.getCurrentStreak()}, LocaleContextHolder.getLocale());
+                firstLoginToday = true;
             } else if (days > 1) {
                 streak.setCurrentStreak(1);
+                message = messageSource.getMessage("streak.reset", null, LocaleContextHolder.getLocale());
+                firstLoginToday = true;
+            } else {
+                message = messageSource.getMessage("streak.maintain", null, LocaleContextHolder.getLocale());
             }
         }
 
         streak.setLastActivityDate(TimeUtils.now());
         streakRepository.save(streak);
 
-        return new StreakUpdateResult(firstLoginToday, streak.getCurrentStreak(), streak.getMaxStreak());
+        return new StreakUpdateResult(firstLoginToday,
+                streak.getCurrentStreak(),
+                streak.getMaxStreak(),
+                message);
     }
-
 
     @Override
     public Streak getStreak(Account account) {

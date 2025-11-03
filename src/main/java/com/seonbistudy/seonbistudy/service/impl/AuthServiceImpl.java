@@ -98,14 +98,17 @@ public class AuthServiceImpl implements IAuthService {
         }
 
         var result = streakService.updateStreak(account);
-        if (result.firstLoginToday()) {
+        if (result.isFirstLoginToday()) {
             xpService.grantXp(account.getId(), XpActivityType.DAILY_LOGIN);
         }
+
+        var user = buildUser(account);
+        user.setStreakMsg(result.getMessage());
 
         return AuthResponse.builder()
                 .accessToken(jwtService.generateAccessToken(account))
                 .refreshToken(jwtService.generateRefreshToken(account))
-                .user(buildUser(account))
+                .user(user)
                 .build();
     }
 
