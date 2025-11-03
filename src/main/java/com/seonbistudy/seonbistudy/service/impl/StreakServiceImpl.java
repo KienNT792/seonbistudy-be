@@ -44,29 +44,26 @@ public class StreakServiceImpl implements IStreakService {
                 ? streak.getLastActivityDate().atZone(TimeUtils.TIME_ZONE).toLocalDate()
                 : null;
 
-        boolean firstLoginToday = false;
         String message;
 
         if (lastDay == null) {
             streak.setCurrentStreak(1);
             message = messageSource.getMessage("streak.new", null, LocaleContextHolder.getLocale());
-            firstLoginToday = true;
         } else {
             long days = ChronoUnit.DAYS.between(lastDay, today);
             if (days == 1) {
                 streak.setCurrentStreak(streak.getCurrentStreak() + 1);
                 message = messageSource.getMessage("streak.increment",
                         new Object[]{streak.getCurrentStreak()}, LocaleContextHolder.getLocale());
-                firstLoginToday = true;
             } else if (days > 1) {
                 streak.setCurrentStreak(1);
                 message = messageSource.getMessage("streak.reset", null, LocaleContextHolder.getLocale());
-                firstLoginToday = true;
             } else {
                 message = messageSource.getMessage("streak.maintain", null, LocaleContextHolder.getLocale());
             }
         }
 
+        boolean firstLoginToday = (lastDay == null) || !lastDay.isEqual(today);
         streak.setLastActivityDate(TimeUtils.now());
         streakRepository.save(streak);
 
