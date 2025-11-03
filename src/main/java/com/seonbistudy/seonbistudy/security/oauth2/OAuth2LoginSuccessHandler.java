@@ -2,6 +2,9 @@ package com.seonbistudy.seonbistudy.security.oauth2;
 
 import java.io.IOException;
 
+import com.seonbistudy.seonbistudy.model.enums.XpActivityType;
+import com.seonbistudy.seonbistudy.service.IStreakService;
+import com.seonbistudy.seonbistudy.service.IXpService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -26,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final IUserService userService;
+    private final IStreakService streakService;
+    private final IXpService xpService;
     private final JwtService jwtService;
 
     @Value("${app.oauth2.redirect-uri}")
@@ -33,10 +38,10 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-            Authentication authentication) throws IOException, ServletException {
-        
+                                        Authentication authentication) throws IOException, ServletException {
+
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        
+
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
         String providerId = oAuth2User.getAttribute("sub");
@@ -54,33 +59,37 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     .role(Role.STUDENT)
                     .enabled(true)
                     .build();
-            
+
             // Tạo user profile
             User user = User.builder()
                     .fullName(name)
                     .build();
-            
+
             // Save account and user
             account = userService.createAccountWithUser(account, user);
+
+            // Cộng XP & khởi tạo streak cho người mới
+            xpService.grantXp(account.getId(), XpActivityType.ACCOUNT_REGISTER);
+            streakService.initStreak(account);
         } else {
-            // Nếu email đã tồn tại, kiểm tra xem account có enabled không
             if (!userService.isAccountEnabled(account)) {
-                // Nếu account bị disabled, chuyển hướng với lỗi
                 String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
                         .queryParam("error", "Account is disabled")
                         .build().toUriString();
                 getRedirectStrategy().sendRedirect(request, response, targetUrl);
                 return;
             }
-            // TODO: Update streak.
+            // Cập nhật streak & XP mỗi lần login
+            streakService.updateStreak(account);
+            xpService.grantXp(account.getId(), XpActivityType.DAILY_LOGIN);
         }
 
         // Tạo JWT token trực tiếp
-        String token = jwtService.generateToken(account);
-
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
-                .queryParam("token", token)
-                .build().toUriString();
+                .queryParam("accessToken", jwtService.generateAccessToken(account))
+                .queryParam("refreshToken", jwtService.generateRefreshToken(account))
+                .build()
+                .toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }

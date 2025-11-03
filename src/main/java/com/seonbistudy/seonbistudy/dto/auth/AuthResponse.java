@@ -12,12 +12,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthResponse {
-    private String token;
-    @Builder.Default
-    private String type = "Bearer";
-    private Long id;
-    private String username;
-    private String email;
-    private String fullName;
-    private Role role;
+    private String accessToken;
+    private String refreshToken;
+    private UserResponse user;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserResponse {
+        private Long id;
+        private String username;
+        private String fullName;
+        private String email;
+        private Role role;
+        private long currentXp;
+        private int currentStreak;
+    }
 }

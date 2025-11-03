@@ -1,7 +1,6 @@
 package com.seonbistudy.seonbistudy.service.impl;
 
-import com.seonbistudy.seonbistudy.model.entity.Streak;
-import com.seonbistudy.seonbistudy.repository.StreakRepository;
+import com.seonbistudy.seonbistudy.model.enums.XpActivityType;
 import com.seonbistudy.seonbistudy.service.IStreakService;
 import com.seonbistudy.seonbistudy.service.IXpService;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,8 +24,6 @@ import com.seonbistudy.seonbistudy.service.IUserService;
 
 import lombok.RequiredArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements IAuthService {
@@ -38,29 +35,21 @@ public class AuthServiceImpl implements IAuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final StreakRepository streakRepository;
 
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        // Validate username
+        // Validate request
         if (accountRepository.existsByUsername(request.getUsername())) {
             throw new SeonbiException(ErrorCode.AUTH_USERNAME_EXISTS);
         }
 
-        // Validate email
         if (accountRepository.existsByEmail(request.getEmail())) {
             throw new SeonbiException(ErrorCode.AUTH_EMAIL_EXISTS);
         }
 
-        // Validate username length
-        if (request.getUsername().length() < 3) {
-            throw new SeonbiException(ErrorCode.AUTH_USERNAME_TOO_SHORT);
-        }
-
-        // Validate password strength
-        if (request.getPassword().length() < 6) {
-            throw new SeonbiException(ErrorCode.AUTH_PASSWORD_TOO_WEAK);
+        if (!request.getPassword().equals(request.getRePassword())) {
+            throw new SeonbiException(ErrorCode.AUTH_PASSWORD_MISMATCH);
         }
 
         // Create account
@@ -81,16 +70,10 @@ public class AuthServiceImpl implements IAuthService {
         // Save account and user
         Account savedAccount = userService.createAccountWithUser(account, user);
 
-        var jwtToken = jwtService.generateToken(savedAccount);
-
-
         return AuthResponse.builder()
-                .token(jwtToken)
-                .id(savedAccount.getId())
-                .username(savedAccount.getUsername())
-                .email(savedAccount.getEmail())
-                .fullName(user.getFullName())
-                .role(savedAccount.getRole())
+                .accessToken(jwtService.generateAccessToken(savedAccount))
+                .refreshToken(jwtService.generateRefreshToken(savedAccount))
+                .user(buildUser(savedAccount))
                 .build();
     }
 
@@ -113,16 +96,29 @@ public class AuthServiceImpl implements IAuthService {
             throw new SeonbiException(ErrorCode.AUTH_ACCOUNT_DISABLED);
         }
 
-        streakService.updateStreak(account.getId());
-        var jwtToken = jwtService.generateToken(account);
+        streakService.updateStreak(account);
+        xpService.grantXp(account.getId(), XpActivityType.DAILY_LOGIN);
 
         return AuthResponse.builder()
-                .token(jwtToken)
-                .id(account.getId())
-                .username(account.getUsername())
-                .email(account.getEmail())
-                .fullName(account.getUser() != null ? account.getUser().getFullName() : null)
-                .role(account.getRole())
+                .accessToken(jwtService.generateAccessToken(account))
+                .refreshToken(jwtService.generateRefreshToken(account))
+                .user(buildUser(account))
                 .build();
+    }
+
+    private AuthResponse.UserResponse buildUser(Account account) {
+        var progress = xpService.getProgress(account);
+        var streak =  streakService.getStreak(account);
+
+        AuthResponse.UserResponse user = new AuthResponse.UserResponse();
+        user.setId(account.getId());
+        user.setUsername(account.getUsername());
+        user.setFullName(account.getUser() != null ? account.getUser().getFullName() : null);
+        user.setEmail(account.getEmail());
+        user.setRole(account.getRole());
+        user.setCurrentXp(progress.getTotalXp());
+        user.setCurrentStreak(streak.getCurrentStreak());
+
+        return user;
     }
 }

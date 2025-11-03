@@ -2,6 +2,7 @@ package com.seonbistudy.seonbistudy.service.impl;
 
 import com.seonbistudy.seonbistudy.exception.ErrorCode;
 import com.seonbistudy.seonbistudy.exception.SeonbiException;
+import com.seonbistudy.seonbistudy.model.entity.Account;
 import com.seonbistudy.seonbistudy.model.entity.UserProgress;
 import com.seonbistudy.seonbistudy.model.enums.XpActivityType;
 import com.seonbistudy.seonbistudy.repository.LevelThresholdRepository;
@@ -38,6 +39,23 @@ public class XpService implements IXpService {
 //        redisTemplate.opsForValue().increment(redisKey, activity.getDefaultXp());
     }
 
+    @Override
+    public UserProgress getProgress(Account account) {
+        return userProgressRepository.findByAccountId(account.getId())
+                .orElseThrow(() -> new SeonbiException(ErrorCode.CMN_RESOURCE_NOT_FOUND));
+    }
+
+    @Override
+    public UserProgress initProgress(Account account) {
+        var newProgress = UserProgress.builder()
+                .account(account)
+                .level(1)
+                .totalXp((long) XpActivityType.ACCOUNT_REGISTER.getDefaultXp())
+                .build();
+
+        return userProgressRepository.save(newProgress);
+    }
+
     private void grantXpInternal(Long accountId, int xpGained, String activityType) {
         if (xpGained <= 0) {
             return;
@@ -59,9 +77,11 @@ public class XpService implements IXpService {
 
     private void checkAndProcessLevelUp(UserProgress userProgress, long newTotalXp) {
         int currentLevel = userProgress.getLevel();
-        Long xpRequired = levelThresholdRepository.findByLevel(currentLevel).getXpRequired();
-        if (newTotalXp >= xpRequired) {
-            userProgress.setLevel(currentLevel + 1);
+        while (true) {
+            var threshold = levelThresholdRepository.findByLevel(currentLevel);
+            if (threshold == null || newTotalXp < threshold.getXpRequired()) break;
+            currentLevel++;
         }
+        userProgress.setLevel(currentLevel);
     }
 }

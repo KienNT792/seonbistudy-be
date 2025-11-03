@@ -20,10 +20,10 @@ public class Streak extends BaseEntity {
     private Account account;
 
     @Column(name = "current_streak", nullable = false)
-    private int currentStreak = 0;
+    private int currentStreak;
 
     @Column(name = "max_streak", nullable = false)
-    private int maxStreak = 1;
+    private int maxStreak;
 
     @Column(name = "last_activity_date")
     private LocalDateTime lastActivityDate;

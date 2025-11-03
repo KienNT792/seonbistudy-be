@@ -7,6 +7,8 @@ import com.seonbistudy.seonbistudy.model.entity.UserProgress;
 import com.seonbistudy.seonbistudy.model.enums.XpActivityType;
 import com.seonbistudy.seonbistudy.repository.StreakRepository;
 import com.seonbistudy.seonbistudy.repository.UserProgressRepository;
+import com.seonbistudy.seonbistudy.service.IStreakService;
+import com.seonbistudy.seonbistudy.service.IXpService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -26,8 +28,8 @@ public class UserServiceImpl implements IUserService {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
-    private final UserProgressRepository userProgressRepository;
-    private final StreakRepository streakRepository;
+    private final IXpService xpService;
+    private final IStreakService streakService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -54,22 +56,9 @@ public class UserServiceImpl implements IUserService {
         user.setAccount(savedAccount);
         userRepository.save(user);
 
-        // Create default UserProgress
-        var newUserProgress = UserProgress.builder()
-                .account(savedAccount)
-                .level(1)
-                .totalXp((long) XpActivityType.ACCOUNT_REGISTER.getDefaultXp())
-                .build();
-        userProgressRepository.save(newUserProgress);
+        streakService.initStreak(savedAccount);
+        xpService.initProgress(savedAccount);
 
-        // Create default Streak
-        var newUserStreak = Streak.builder()
-                .account(savedAccount)
-                .currentStreak(1)
-                .maxStreak(1)
-                .lastActivityDate(LocalDateTime.now())
-                .build();
-        streakRepository.save(newUserStreak);
         return savedAccount;
     }
 

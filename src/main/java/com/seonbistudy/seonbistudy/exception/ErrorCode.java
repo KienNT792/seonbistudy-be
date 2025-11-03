@@ -40,18 +40,15 @@ public enum ErrorCode {
     AUTH_ACCOUNT_LOCKED("AUTH-1004", "Account is locked", HttpStatus.FORBIDDEN),
     AUTH_USERNAME_EXISTS("AUTH-1005", "Username is already taken", HttpStatus.BAD_REQUEST),
     AUTH_EMAIL_EXISTS("AUTH-1006", "Email is already in use", HttpStatus.BAD_REQUEST),
-    
+    AUTH_PASSWORD_MISMATCH("AUTH-1007", "Password mismatch", HttpStatus.BAD_REQUEST),
+    AUTH_OLD_PASSWORD_INCORRECT("AUTH-1008", "Old password is incorrect", HttpStatus.BAD_REQUEST),
+
     // Token Errors (AUTH-2xxx)
     AUTH_TOKEN_INVALID("AUTH-2001", "Invalid or malformed token", HttpStatus.UNAUTHORIZED),
     AUTH_TOKEN_EXPIRED("AUTH-2002", "Token has expired", HttpStatus.UNAUTHORIZED),
     AUTH_TOKEN_MISSING("AUTH-2003", "Authentication token is missing", HttpStatus.UNAUTHORIZED),
     AUTH_TOKEN_REVOKED("AUTH-2004", "Token has been revoked", HttpStatus.UNAUTHORIZED),
-    
-    // Password Errors (AUTH-3xxx)
-    AUTH_PASSWORD_TOO_WEAK("AUTH-3001", "Password does not meet security requirements", HttpStatus.BAD_REQUEST),
-    AUTH_PASSWORD_MISMATCH("AUTH-3002", "Password confirmation does not match", HttpStatus.BAD_REQUEST),
-    AUTH_OLD_PASSWORD_INCORRECT("AUTH-3003", "Old password is incorrect", HttpStatus.BAD_REQUEST),
-    
+
     // OAuth2 Errors (AUTH-4xxx)
     AUTH_OAUTH2_PROVIDER_ERROR("AUTH-4001", "OAuth2 provider authentication failed", HttpStatus.BAD_REQUEST),
     AUTH_OAUTH2_EMAIL_NOT_VERIFIED("AUTH-4002", "Email from OAuth2 provider is not verified", HttpStatus.BAD_REQUEST),

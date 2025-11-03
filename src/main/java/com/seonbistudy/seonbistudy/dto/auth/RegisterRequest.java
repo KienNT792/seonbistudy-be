@@ -21,6 +21,10 @@ public class RegisterRequest {
     @Size(min = 6, max = 100, message = "Password must be at least 6 characters")
     private String password;
 
+    @NotBlank(message = "Re-password is required")
+    @Size(min = 6, max = 100, message = "Re-password must be at least 6 characters")
+    private String rePassword;
+
     @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
     private String email;
