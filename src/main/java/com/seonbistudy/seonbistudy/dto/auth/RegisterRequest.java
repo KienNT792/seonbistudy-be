@@ -1,18 +1,23 @@
 package com.seonbistudy.seonbistudy.dto.auth;
 
-import com.seonbistudy.seonbistudy.model.enums.Role;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterRequest {
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid")
+    private String email;
+
     @NotBlank(message = "Username is required")
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     private String username;
@@ -21,17 +26,15 @@ public class RegisterRequest {
     @Size(min = 6, max = 100, message = "Password must be at least 6 characters")
     private String password;
 
-    @NotBlank(message = "Re-password is required")
-    @Size(min = 6, max = 100, message = "Re-password must be at least 6 characters")
-    private String rePassword;
+    @Past(message = "Birthday must be a past date")
+    private LocalDate birthday;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Email should be valid")
-    private String email;
+    @NotBlank(message = "Language is required")
+    private String language;
 
-    @NotBlank(message = "Full name is required")
-    @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters")
-    private String fullName;
+    @NotBlank(message = "Timezone is required")
+    private String timezone;
 
-    private Role role = Role.STUDENT;
+    private Boolean receiveEmails;
+    private Boolean acceptTerms;
 }

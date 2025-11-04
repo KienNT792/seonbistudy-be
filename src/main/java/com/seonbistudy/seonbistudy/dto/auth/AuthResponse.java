@@ -1,5 +1,6 @@
 package com.seonbistudy.seonbistudy.dto.auth;
 
+import com.seonbistudy.seonbistudy.model.enums.Language;
 import com.seonbistudy.seonbistudy.model.enums.Role;
 
 import lombok.AllArgsConstructor;
@@ -29,5 +30,7 @@ public class AuthResponse {
         private int currentStreak;
         private String streakMsg;
         private int currentLevel;
+        private Language language;
+        private String timeZone;
     }
 }

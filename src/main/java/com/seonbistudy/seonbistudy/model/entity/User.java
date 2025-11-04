@@ -4,12 +4,8 @@ import java.time.LocalDate;
 
 import com.seonbistudy.seonbistudy.model.base.BaseEntity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import com.seonbistudy.seonbistudy.model.enums.Language;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,7 +25,7 @@ public class User extends BaseEntity {
     @JoinColumn(name = "account_id", nullable = false, unique = true)
     private Account account;
 
-    @Column(name = "full_name", nullable = false)
+    @Column(name = "full_name")
     private String fullName;
 
     @Column(name = "phone_number", length = 20)
@@ -46,4 +42,9 @@ public class User extends BaseEntity {
 
     @Column(name = "bio", length = 1000)
     private String bio;
+
+    @Enumerated(EnumType.STRING)
+    private Language language;
+
+    private String timezone;
 }

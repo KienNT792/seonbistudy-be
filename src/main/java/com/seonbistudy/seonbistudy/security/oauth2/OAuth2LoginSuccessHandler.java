@@ -2,6 +2,7 @@ package com.seonbistudy.seonbistudy.security.oauth2;
 
 import java.io.IOException;
 
+import com.seonbistudy.seonbistudy.model.enums.AccountStatus;
 import com.seonbistudy.seonbistudy.model.enums.XpActivityType;
 import com.seonbistudy.seonbistudy.service.IStreakService;
 import com.seonbistudy.seonbistudy.service.IXpService;
@@ -57,7 +58,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     .provider(AuthProvider.GOOGLE)
                     .providerId(providerId)
                     .role(Role.STUDENT)
-                    .enabled(true)
+                    .accountStatus(AccountStatus.ACTIVE)
                     .build();
 
             // Tạo user profile

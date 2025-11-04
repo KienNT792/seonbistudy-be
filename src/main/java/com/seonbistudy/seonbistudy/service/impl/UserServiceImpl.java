@@ -1,12 +1,6 @@
 package com.seonbistudy.seonbistudy.service.impl;
 
-import java.time.LocalDateTime;
-
-import com.seonbistudy.seonbistudy.model.entity.Streak;
-import com.seonbistudy.seonbistudy.model.entity.UserProgress;
-import com.seonbistudy.seonbistudy.model.enums.XpActivityType;
-import com.seonbistudy.seonbistudy.repository.StreakRepository;
-import com.seonbistudy.seonbistudy.repository.UserProgressRepository;
+import com.seonbistudy.seonbistudy.dto.user.UpdateLanguageRequest;
 import com.seonbistudy.seonbistudy.service.IStreakService;
 import com.seonbistudy.seonbistudy.service.IXpService;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -65,5 +59,10 @@ public class UserServiceImpl implements IUserService {
     @Override
     public boolean isAccountEnabled(Account account) {
         return account != null && account.isEnabled();
+    }
+
+    @Override
+    public void updateLanguage(UpdateLanguageRequest request) {
+
     }
 }

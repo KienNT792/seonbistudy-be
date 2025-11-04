@@ -3,6 +3,8 @@ package com.seonbistudy.seonbistudy.model.entity;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.seonbistudy.seonbistudy.model.enums.AccountStatus;
+import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,13 +13,6 @@ import com.seonbistudy.seonbistudy.model.base.BaseEntity;
 import com.seonbistudy.seonbistudy.model.enums.AuthProvider;
 import com.seonbistudy.seonbistudy.model.enums.Role;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,24 +37,28 @@ public class Account extends BaseEntity implements UserDetails {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "enabled", nullable = false)
-    @Builder.Default
-    private boolean enabled = true;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_status", nullable = false)
+    private AccountStatus accountStatus;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "provider", nullable = false)
-    @Builder.Default
     private AuthProvider provider = AuthProvider.LOCAL;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    @Builder.Default
     private Role role = Role.STUDENT;
 
     @Column(name = "provider_id")
     private String providerId;
 
-    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "is_receive_emails", nullable = false)
+    private Boolean isReceiveEmails;
+
+    @Column(name = "is_accept_terms")
+    private Boolean isAcceptTerms;
+
+    @OneToOne(mappedBy = "account", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private User user;
 
     @Override
@@ -97,6 +96,6 @@ public class Account extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return enabled;
+        return AccountStatus.ACTIVE.equals(accountStatus);
     }
 }

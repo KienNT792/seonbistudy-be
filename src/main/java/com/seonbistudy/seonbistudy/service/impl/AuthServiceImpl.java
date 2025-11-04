@@ -1,6 +1,6 @@
 package com.seonbistudy.seonbistudy.service.impl;
 
-import com.seonbistudy.seonbistudy.model.enums.XpActivityType;
+import com.seonbistudy.seonbistudy.model.enums.*;
 import com.seonbistudy.seonbistudy.service.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,7 +17,6 @@ import com.seonbistudy.seonbistudy.exception.ErrorCode;
 import com.seonbistudy.seonbistudy.exception.SeonbiException;
 import com.seonbistudy.seonbistudy.model.entity.Account;
 import com.seonbistudy.seonbistudy.model.entity.User;
-import com.seonbistudy.seonbistudy.model.enums.AuthProvider;
 import com.seonbistudy.seonbistudy.repository.AccountRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -47,23 +46,23 @@ public class AuthServiceImpl implements IAuthService {
             throw new SeonbiException(ErrorCode.AUTH_EMAIL_EXISTS);
         }
 
-        if (!request.getPassword().equals(request.getRePassword())) {
-            throw new SeonbiException(ErrorCode.AUTH_PASSWORD_MISMATCH);
-        }
-
         // Create account
         var account = Account.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .hashedPassword(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
+                .role(Role.STUDENT)
                 .provider(AuthProvider.LOCAL)
-                .enabled(true)
+                .accountStatus(AccountStatus.ACTIVE)
+                .isAcceptTerms(request.getAcceptTerms())
+                .isReceiveEmails(request.getReceiveEmails())
                 .build();
 
         // Create user profile
         var user = User.builder()
-                .fullName(request.getFullName())
+                .timezone(request.getTimezone())
+                .dateOfBirth(request.getBirthday())
+                .language(Language.valueOf(request.getLanguage().toUpperCase()))
                 .build();
 
         // Save account and user
@@ -126,16 +125,17 @@ public class AuthServiceImpl implements IAuthService {
     private AuthResponse.UserResponse buildUser(Account account) {
         var progress = xpService.getProgress(account);
         var streak = streakService.getStreak(account);
-
-        AuthResponse.UserResponse user = new AuthResponse.UserResponse();
-        user.setId(account.getId());
-        user.setUsername(account.getUsername());
-        user.setFullName(account.getUser() != null ? account.getUser().getFullName() : null);
-        user.setEmail(account.getEmail());
-        user.setRole(account.getRole());
-        user.setCurrentXp(progress.getTotalXp());
-        user.setCurrentStreak(streak.getCurrentStreak());
-
-        return user;
+        var user = account.getUser();
+        AuthResponse.UserResponse userResponse = new AuthResponse.UserResponse();
+        userResponse.setId(account.getId());
+        userResponse.setUsername(account.getUsername());
+        userResponse.setFullName(user != null ? user.getFullName() : null);
+        userResponse.setEmail(account.getEmail());
+        userResponse.setRole(account.getRole());
+        userResponse.setCurrentXp(progress.getTotalXp());
+        userResponse.setCurrentStreak(streak.getCurrentStreak());
+        userResponse.setLanguage(user != null ? user.getLanguage() : null);
+        userResponse.setTimeZone(user != null ? user.getTimezone() : null);
+        return userResponse;
     }
 }

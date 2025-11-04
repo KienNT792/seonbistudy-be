@@ -1,5 +1,6 @@
 package com.seonbistudy.seonbistudy.service;
 
+import com.seonbistudy.seonbistudy.dto.user.UpdateLanguageRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,4 +15,5 @@ public interface IUserService extends UserDetailsService {
     Account findAccountByEmail(String email);
     Account createAccountWithUser(Account account, User user);
     boolean isAccountEnabled(Account account);
+    void updateLanguage(UpdateLanguageRequest request);
 }
