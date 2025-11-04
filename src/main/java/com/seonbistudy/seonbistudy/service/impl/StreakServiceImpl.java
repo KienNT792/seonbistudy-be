@@ -48,16 +48,18 @@ public class StreakServiceImpl implements IStreakService {
 
         if (lastDay == null) {
             streak.setCurrentStreak(1);
-            message = messageSource.getMessage("streak.new", null, LocaleContextHolder.getLocale());
+            message = getStreakMessage(1);
         } else {
             long days = ChronoUnit.DAYS.between(lastDay, today);
             if (days == 1) {
                 streak.setCurrentStreak(streak.getCurrentStreak() + 1);
-                message = messageSource.getMessage("streak.increment",
-                        new Object[]{streak.getCurrentStreak()}, LocaleContextHolder.getLocale());
+                if (streak.getCurrentStreak() > streak.getMaxStreak()) {
+                    streak.setMaxStreak(streak.getCurrentStreak());
+                }
+                message = getStreakMessage(streak.getCurrentStreak());
             } else if (days > 1) {
                 streak.setCurrentStreak(1);
-                message = messageSource.getMessage("streak.reset", null, LocaleContextHolder.getLocale());
+                message = messageSource.getMessage("streak.lost", null, LocaleContextHolder.getLocale());
             } else {
                 message = messageSource.getMessage("streak.common", null, LocaleContextHolder.getLocale());
             }
@@ -77,5 +79,50 @@ public class StreakServiceImpl implements IStreakService {
     public Streak getStreak(Account account) {
         return streakRepository.findByAccountId(account.getId())
                 .orElseThrow(() -> new SeonbiException(ErrorCode.CMN_RESOURCE_NOT_FOUND));
+    }
+
+    private String getStreakMessage(int currentStreak) {
+        String messageKey;
+
+        // Check for specific milestone days
+        if (currentStreak == 1) {
+            messageKey = "streak.day.1";
+        } else if (currentStreak == 2) {
+            messageKey = "streak.day.2";
+        } else if (currentStreak == 3) {
+            messageKey = "streak.day.3";
+        } else if (currentStreak == 5) {
+            messageKey = "streak.day.5";
+        } else if (currentStreak == 7) {
+            messageKey = "streak.day.7";
+        } else if (currentStreak == 10) {
+            messageKey = "streak.day.10";
+        } else if (currentStreak == 14) {
+            messageKey = "streak.day.14";
+        } else if (currentStreak == 21) {
+            messageKey = "streak.day.21";
+        } else if (currentStreak == 30) {
+            messageKey = "streak.day.30";
+        } else if (currentStreak == 50) {
+            messageKey = "streak.day.50";
+        } else if (currentStreak == 60) {
+            messageKey = "streak.day.60";
+        } else if (currentStreak == 90) {
+            messageKey = "streak.day.90";
+        } else if (currentStreak == 100) {
+            messageKey = "streak.day.100";
+        } else {
+            // For other days, use generic messages with rotation
+            int messageVariant = currentStreak % 3;
+            if (messageVariant == 0) {
+                messageKey = "streak.generic";
+            } else if (messageVariant == 1) {
+                messageKey = "streak.generic.alt1";
+            } else {
+                messageKey = "streak.generic.alt2";
+            }
+        }
+
+        return messageSource.getMessage(messageKey, new Object[]{currentStreak}, LocaleContextHolder.getLocale());
     }
 }

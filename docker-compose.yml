@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  mysql:
+    image: mysql:8.0
+    container_name: seonbistudy-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: seonbistudy_db
+      MYSQL_USER: seonbi_user
+      MYSQL_PASSWORD: seonbi_password
+    ports:
+      - "3307:3306"  # Host:Container mapping (using 3307 to avoid conflict with local MySQL)
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./src/main/resources/SQLScript:/docker-entrypoint-initdb.d
+    networks:
+      - seonbistudy-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: seonbistudy-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Database Configuration
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: seonbistudy_db
+      DB_USERNAME: seonbi_user
+      DB_PASSWORD: seonbi_password
+
+      # JWT Configuration
+      JWT_SECRET: your-secret-key-change-this-in-production-minimum-256-bits
+      JWT_ACCESS_TOKEN_EXPIRATION: 3600000
+      JWT_REFRESH_TOKEN_EXPIRATION: 86400000
+
+      # OAuth2 Configuration
+      GOOGLE_CLIENT_ID: your-google-client-id
+      GOOGLE_CLIENT_SECRET: your-google-client-secret
+      OAUTH2_REDIRECT_URI: http://localhost:3000/oauth2/redirect
+
+      # CORS Configuration
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173
+
+      # Server Configuration
+      SERVER_PORT: 8080
+
+      # Logging
+      LOGGING_LEVEL: INFO
+
+      # Spring Profile
+      SPRING_PROFILES_ACTIVE: default
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - seonbistudy-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  seonbistudy-network:
+    driver: bridge
+
